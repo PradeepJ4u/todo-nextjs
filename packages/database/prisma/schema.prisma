@@ -1,0 +1,66 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Occurence {
+  noDate
+  once
+  weekly
+  monthly
+  yearly
+}
+
+enum Priority{
+  low
+  medium
+  high
+}
+
+model Todos {
+  id          Int         @id @default(autoincrement())
+  discription   String
+  occurence     Occurence
+  priority      Priority
+  autoComplete  Boolean   @default(false)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  user          Users     @relation(fields: [userId], references: [id])
+  userId        Int
+  allTodos      AllTodos[]  
+}
+
+enum Status{
+  notStarted
+  notDone
+  inProgress
+  completed
+}
+model AllTodos {
+  id      Int     @id @default(autoincrement())
+  dueDate DateTime 
+  status  Status  @default(notStarted)
+  user    Users   @relation(fields: [userId], references: [id])
+  userId  Int     @unique
+  todo    Todos   @relation(fields: [todoId], references: [id])
+  todoId  Int
+}
+
+model Users {
+  id        Int       @id @default(autoincrement())
+  username  String    @unique
+  password  String    @unique
+  firstName String
+  lastName  String?
+  createdAt DateTime  @default(now()) 
+  isAdmin   Boolean   @default(false)
+  todos     Todos[]
+  allTodos  AllTodos[]
+}
